@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Metrics Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .tooltip {
+            display: none;
+            position: absolute;
+            background: black;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            width: 200px;
+            z-index: 100;
+        }
+        
+        .info-icon:hover + .tooltip {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex items-center space-x-3 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <h1 class="text-2xl font-bold">Stock Metrics Calculator</h1>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <!-- Input Section -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">Input Values</h2>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            P/E Ratio
+                            <span class="info-icon ml-2 text-gray-400 cursor-help">ⓘ</span>
+                            <span class="tooltip">Price-to-Earnings Ratio: A valuation measure comparing stock price to earnings per share</span>
+                        </label>
+                        <input type="number" id="pe" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter P/E Ratio" step="0.01">
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            EPS
+                            <span class="info-icon ml-2 text-gray-400 cursor-help">ⓘ</span>
+                            <span class="tooltip">Earnings Per Share: Company's profit divided by outstanding shares</span>
+                        </label>
+                        <input type="number" id="eps" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter EPS" step="0.01">
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Dividend Yield (%)
+                            <span class="info-icon ml-2 text-gray-400 cursor-help">ⓘ</span>
+                            <span class="tooltip">Annual dividends per share divided by stock price</span>
+                        </label>
+                        <input type="number" id="dividendYield" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter Dividend Yield" step="0.01">
+                    </div>
+
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            ROE (%)
+                            <span class="info-icon ml-2 text-gray-400 cursor-help">ⓘ</span>
+                            <span class="tooltip">Return on Equity: Measures company's profitability relative to shareholders' equity</span>
+                        </label>
+                        <input type="number" id="roe" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter ROE" step="0.01">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Sustainable Growth Method</label>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="growthMethod" value="calculate" checked class="mr-2">
+                                Calculate automatically
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="growthMethod" value="manual" class="mr-2">
+                                Enter manually
+                            </label>
+                        </div>
+                        <div id="manualGrowthInput" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Manual Sustainable Growth (%)
+                                <span class="info-icon ml-2 text-gray-400 cursor-help">ⓘ</span>
+                                <span class="tooltip">Enter your own sustainable growth rate</span>
+                            </label>
+                            <input type="number" id="manualGrowth" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter growth rate" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">Calculated Metrics</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Stock Price ($)</span>
+                        <span id="stockPrice" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Dividends Per Share ($)</span>
+                        <span id="dps" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Dividend Payout Ratio (%)</span>
+                        <span id="dividendPayoutRatio" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Retention Ratio (%)</span>
+                        <span id="retentionRatio" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Sustainable Growth (%)</span>
+                        <span id="sustainableGrowth" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Intrinsic Value ($)</span>
+                        <span id="intrinsicValue" class="font-semibold">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="text-gray-600">Margin of Safety - Buy Price ($)</span>
+                        <span id="marginOfSafety" class="font-semibold">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-blue-50 p-4 rounded-lg mt-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-2">How to Use</h3>
+            <ul class="list-disc pl-5 text-blue-700 space-y-1">
+                <li>Enter the required input values in the left panel</li>
+                <li>Results will automatically update in the right panel</li>
+                <li>Hover over the info icons for additional information about each metric</li>
+                <li>All calculations follow the formulas shown in the reference table</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function calculateMetrics() {
+            const pe = parseFloat(document.getElementById('pe').value) || 0;
+            const eps = parseFloat(document.getElementById('eps').value) || 0;
+            const dividendYield = parseFloat(document.getElementById('dividendYield').value) || 0;
+            const roe = parseFloat(document.getElementById('roe').value) || 0;
+
+            const stockPrice = pe * eps;
+            const dps = (dividendYield * stockPrice) / 100;
+            const dividendPayoutRatio = (dps / eps) * 100;
+            const retentionRatio = 1 - (dividendPayoutRatio / 100);
+            let sustainableGrowth;
+            const growthMethod = document.querySelector('input[name="growthMethod"]:checked').value;
+            
+            if (growthMethod === 'manual') {
+                sustainableGrowth = parseFloat(document.getElementById('manualGrowth').value || 0) / 100;
+            } else {
+                sustainableGrowth = (roe / 100) * retentionRatio; // Converting ROE from percentage to decimal
+            }
+            const intrinsicValue = eps * (7 + 1.5 * (sustainableGrowth * 100)); // Multiply by 100 since sustainableGrowth is in decimal form
+            const marginOfSafety = intrinsicValue * 0.7;
+
+            document.getElementById('stockPrice').textContent = stockPrice.toFixed(2);
+            document.getElementById('dps').textContent = dps.toFixed(2);
+            document.getElementById('dividendPayoutRatio').textContent = dividendPayoutRatio.toFixed(2);
+            document.getElementById('retentionRatio').textContent = (retentionRatio * 100).toFixed(2);
+            document.getElementById('sustainableGrowth').textContent = (sustainableGrowth * 100).toFixed(2);
+            document.getElementById('intrinsicValue').textContent = intrinsicValue.toFixed(2);
+            document.getElementById('marginOfSafety').textContent = marginOfSafety.toFixed(2);
+        }
+
+        // Add event listeners to all input fields
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', calculateMetrics);
+        });
+
+        // Add event listeners for growth method radio buttons
+        document.querySelectorAll('input[name="growthMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const manualInput = document.getElementById('manualGrowthInput');
+                if (this.value === 'manual') {
+                    manualInput.classList.remove('hidden');
+                } else {
+                    manualInput.classList.add('hidden');
+                }
+                calculateMetrics();
+            });
+        });
+    </script>
+</body>
+</html>
